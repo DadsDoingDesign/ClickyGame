@@ -1,0 +1,199 @@
+/* Global CSS Variables */
+:root {
+  /* Dark Theme (Default) */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-color: #ff4d4d;
+  --button-bg: #ffffff;
+  --button-text: #121212;
+  --header-border: #333333;
+  
+  /* Animation Variables */
+  --transition-speed: 0.3s;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --text-primary: #121212;
+  --text-secondary: #555555;
+  --accent-color: #ff4d4d;
+  --button-bg: #121212;
+  --button-text: #ffffff;
+  --header-border: #dddddd;
+}
+
+/* Reset Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed) ease-in-out, 
+              color var(--transition-speed) ease-in-out;
+  height: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Layout Styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--header-border);
+  transition: border-color var(--transition-speed) ease-in-out;
+}
+
+.game-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.game-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reset-button, 
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: transparent;
+  transition: background-color var(--transition-speed) ease-in-out,
+              color var(--transition-speed) ease-in-out;
+}
+
+.reset-button {
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.theme-toggle {
+  border: 1px solid var(--text-primary);
+  color: var(--text-primary);
+}
+
+.reset-button:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.theme-toggle:hover {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.reset-icon, 
+.theme-icon {
+  margin-right: 0.5rem;
+}
+
+/* Main Content Styles */
+.game-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Score Styles */
+.score-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.score-label {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-display {
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+/* Click Button Styles */
+.game-interaction {
+  margin-top: 2rem;
+}
+
+.click-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: transform 0.1s ease-in-out,
+              background-color var(--transition-speed) ease-in-out,
+              color var(--transition-speed) ease-in-out;
+}
+
+.click-button:hover {
+  transform: scale(1.05);
+}
+
+.click-button:active {
+  transform: scale(0.95);
+}
+
+/* Footer Styles */
+.game-footer {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+  .game-title {
+    font-size: 1.2rem;
+  }
+  
+  .reset-text,
+  .theme-text {
+    display: none;
+  }
+  
+  .reset-icon,
+  .theme-icon {
+    margin-right: 0;
+  }
+  
+  .score-display {
+    font-size: 4rem;
+  }
+}
