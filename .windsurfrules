@@ -1,0 +1,4 @@
+always use semantic style naming
+clearly structure all styles in a global css file with details on where and how things are used
+create components always and try to reuse where possible, utilizing combo classes to make subtle changes when needed
+always use semantic html tags
