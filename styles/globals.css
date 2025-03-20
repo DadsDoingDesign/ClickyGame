@@ -939,54 +939,7 @@ input:checked + .toggle-slider:before {
   }
 }
 
-/* Unlock Notification */
-.unlock-notification-container {
-  position: fixed;
-  top: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-.unlock-notification {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: slideDown 0.3s ease-out forwards, fadeOut 0.3s ease-in forwards 2.7s;
-  max-width: 90%;
-  text-align: center;
-}
-
-.unlock-notification p {
-  margin: 0;
-  font-weight: 600;
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
+/* Removed the old unlock notification styles since we're now using toast notification styles */
 
 /* Mobile Menu Styles */
 .hamburger-menu-button {

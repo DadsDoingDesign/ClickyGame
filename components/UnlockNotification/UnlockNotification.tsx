@@ -11,9 +11,9 @@ export default function UnlockNotification() {
     if (score === 10 && unlockedFeatures.simpleButton) {
       showUnlockNotification('🎉 Unlocked: Gradient Button Theme!');
     } else if (score === 25 && unlockedFeatures.leaderboard) {
-      showUnlockNotification('🎉 Unlocked: Leaderboard Feature!');
+      showUnlockNotification('🏆 Unlocked: Leaderboard Feature!');
     } else if (score === 50 && unlockedFeatures.fireIceTheme) {
-      showUnlockNotification('🎉 Unlocked: Choose your theme - Fire or Ice!');
+      showUnlockNotification('🔥❄️ Unlocked: Choose your theme - Fire or Ice!');
     }
   }, [score, unlockedFeatures]);
 
@@ -30,10 +30,9 @@ export default function UnlockNotification() {
   if (!showNotification || !notification) return null;
 
   return (
-    <div className="unlock-notification-container">
-      <div className="unlock-notification">
-        <p>{notification}</p>
-      </div>
+    <div className="toast-notification success" role="alert" aria-live="polite">
+      <span className="toast-icon" aria-hidden="true">🎮</span>
+      <p>{notification}</p>
     </div>
   );
 }
