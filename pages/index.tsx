@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Layout from '@/components/Layout';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import ClickButton from '@/components/ClickButton';
+import UnlockNotification from '@/components/UnlockNotification/UnlockNotification';
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <Layout>
         <ScoreDisplay />
         <ClickButton />
+        <UnlockNotification />
       </Layout>
     </>
   );

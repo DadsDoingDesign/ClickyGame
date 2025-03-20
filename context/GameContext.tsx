@@ -6,6 +6,16 @@ export interface LeaderboardEntry {
   score: number;
 }
 
+// Define button theme types
+export type ButtonTheme = 'default' | 'simple' | 'fire' | 'ice';
+
+// Define unlocked features interface
+export interface UnlockedFeatures {
+  simpleButton: boolean;
+  leaderboard: boolean;
+  fireIceTheme: boolean;
+}
+
 // Generate 50 dummy data entries for the leaderboard
 const generateDummyData = (): LeaderboardEntry[] => {
   const names = [
@@ -51,6 +61,13 @@ interface GameContextType {
   resetLeaderboard: () => void;
   isDevSettingsOpen: boolean;
   toggleDevSettings: () => void;
+  buttonTheme: ButtonTheme;
+  setButtonTheme: (theme: ButtonTheme) => void;
+  splitButtonEnabled: boolean;
+  toggleSplitButton: () => void;
+  unlockedFeatures: UnlockedFeatures;
+  selectFireIceTheme: (theme: 'fire' | 'ice') => void;
+  hasSelectedFireIceTheme: boolean;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -62,6 +79,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isDevSettingsOpen, setIsDevSettingsOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [buttonTheme, setButtonTheme] = useState<ButtonTheme>('default');
+  const [splitButtonEnabled, setSplitButtonEnabled] = useState<boolean>(true);
+  const [unlockedFeatures, setUnlockedFeatures] = useState<UnlockedFeatures>({
+    simpleButton: false,
+    leaderboard: false,
+    fireIceTheme: false
+  });
+  const [hasSelectedFireIceTheme, setHasSelectedFireIceTheme] = useState<boolean>(false);
 
   // Initialize from localStorage if available (client-side only)
   useEffect(() => {
@@ -92,6 +117,34 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setCurrentUser(savedCurrentUser);
     }
     
+    // Load button theme from localStorage
+    const savedButtonTheme = localStorage.getItem('buttonTheme');
+    if (savedButtonTheme && ['default', 'simple', 'fire', 'ice'].includes(savedButtonTheme)) {
+      setButtonTheme(savedButtonTheme as ButtonTheme);
+    }
+    
+    // Load button splitting setting from localStorage
+    const savedSplitButtonEnabled = localStorage.getItem('splitButtonEnabled');
+    if (savedSplitButtonEnabled !== null) {
+      setSplitButtonEnabled(savedSplitButtonEnabled === 'true');
+    }
+    
+    // Load unlocked features from localStorage
+    const savedUnlockedFeatures = localStorage.getItem('unlockedFeatures');
+    if (savedUnlockedFeatures) {
+      try {
+        setUnlockedFeatures(JSON.parse(savedUnlockedFeatures));
+      } catch (error) {
+        console.error('Failed to parse unlocked features data:', error);
+      }
+    }
+    
+    // Load fire/ice theme selection status
+    const savedHasSelectedFireIceTheme = localStorage.getItem('hasSelectedFireIceTheme');
+    if (savedHasSelectedFireIceTheme) {
+      setHasSelectedFireIceTheme(savedHasSelectedFireIceTheme === 'true');
+    }
+    
     setIsInitialized(true);
   }, []);
 
@@ -105,7 +158,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (currentUser) {
       updateCurrentUserScore();
     }
+    
+    // Check for unlocks based on score thresholds
+    checkUnlocks();
   }, [score, isInitialized]);
+
+  // Save unlocked features to localStorage whenever they change
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('unlockedFeatures', JSON.stringify(unlockedFeatures));
+  }, [unlockedFeatures, isInitialized]);
+  
+  // Save fire/ice theme selection status to localStorage
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('hasSelectedFireIceTheme', hasSelectedFireIceTheme.toString());
+  }, [hasSelectedFireIceTheme, isInitialized]);
 
   // Save leaderboard data to localStorage whenever it changes
   useEffect(() => {
@@ -124,6 +192,60 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser, isInitialized]);
 
+  // Save button theme to localStorage whenever it changes
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('buttonTheme', buttonTheme);
+  }, [buttonTheme, isInitialized]);
+  
+  // Save button splitting setting to localStorage whenever it changes
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem('splitButtonEnabled', splitButtonEnabled.toString());
+  }, [splitButtonEnabled, isInitialized]);
+
+  // Check for unlocks based on score thresholds
+  const checkUnlocks = () => {
+    const updatedUnlocks = { ...unlockedFeatures };
+    let themeChanged = false;
+    
+    // Unlock simple button at 10 clicks
+    if (score >= 10 && !updatedUnlocks.simpleButton) {
+      updatedUnlocks.simpleButton = true;
+      if (buttonTheme === 'default') {
+        setButtonTheme('simple');
+        themeChanged = true;
+      }
+    }
+    
+    // Unlock leaderboard at 25 clicks
+    if (score >= 25 && !updatedUnlocks.leaderboard) {
+      updatedUnlocks.leaderboard = true;
+    }
+    
+    // Unlock fire/ice theme at 50 clicks
+    if (score >= 50 && !updatedUnlocks.fireIceTheme) {
+      updatedUnlocks.fireIceTheme = true;
+    }
+    
+    // Only update state if something changed
+    if (
+      updatedUnlocks.simpleButton !== unlockedFeatures.simpleButton ||
+      updatedUnlocks.leaderboard !== unlockedFeatures.leaderboard ||
+      updatedUnlocks.fireIceTheme !== unlockedFeatures.fireIceTheme
+    ) {
+      setUnlockedFeatures(updatedUnlocks);
+    }
+  };
+  
+  // Function to select fire or ice theme when the button splits
+  const selectFireIceTheme = (theme: 'fire' | 'ice') => {
+    if (!unlockedFeatures.fireIceTheme) return;
+    
+    setButtonTheme(theme);
+    setHasSelectedFireIceTheme(true);
+  };
+
   const incrementScore = () => {
     setScore((prevScore) => prevScore + 1);
   };
@@ -131,8 +253,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetGame = () => {
     setScore(0);
     setCurrentUser(null);
+    setButtonTheme('default');
+    setHasSelectedFireIceTheme(false);
+    setUnlockedFeatures({
+      simpleButton: false,
+      leaderboard: false,
+      fireIceTheme: false
+    });
     localStorage.removeItem('currentUser');
     localStorage.removeItem('hasCreatedAccount');
+    localStorage.removeItem('hasSelectedFireIceTheme');
   };
 
   const resetLeaderboard = () => {
@@ -218,6 +348,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // Keep the leaderboard open to show the updated scores
   };
 
+  const toggleSplitButton = () => {
+    setSplitButtonEnabled(prev => !prev);
+  };
+
   return (
     <GameContext.Provider value={{ 
       score, 
@@ -231,7 +365,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
       getCurrentUserRank,
       resetLeaderboard,
       isDevSettingsOpen,
-      toggleDevSettings
+      toggleDevSettings,
+      buttonTheme,
+      setButtonTheme,
+      splitButtonEnabled,
+      toggleSplitButton,
+      unlockedFeatures,
+      selectFireIceTheme,
+      hasSelectedFireIceTheme
     }}>
       {children}
     </GameContext.Provider>

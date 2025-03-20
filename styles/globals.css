@@ -179,6 +179,18 @@ button {
 /* Click Button Styles */
 .game-interaction {
   margin-top: 2rem;
+  perspective: 1000px;
+}
+
+.button-container {
+  position: relative;
+  width: 200px;
+  height: 60px;
+  margin: 0 auto;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .click-button {
@@ -193,12 +205,224 @@ button {
               color var(--transition-speed) ease-in-out;
 }
 
+/* Splitting Animation Styles */
+.button-container.splitting:not(.split) .click-button {
+  animation: pulseBeforeSplit 0.5s ease-in-out;
+}
+
+.button-container.split {
+  width: 300px;
+}
+
+.button-container.split .left-button,
+.button-container.split .right-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 120px;
+  min-width: 0;
+  padding: 1rem 1rem;
+  transform-origin: center center;
+}
+
+.button-container.split .left-button {
+  left: 0;
+  animation: slideLeftButtonIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.button-container.split .right-button {
+  right: 0;
+  animation: slideRightButtonIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.button-container.splitting.split .left-button {
+  animation: slideLeftButtonIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.button-container.splitting.split .right-button {
+  animation: slideRightButtonIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Button merging animations */
+.button-container.splitting:not(.split) {
+  animation: mergeContainer 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Keyframes for the splitting animations */
+@keyframes pulseBeforeSplit {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideLeftButtonIn {
+  0% {
+    opacity: 0;
+    left: 80px;
+    transform: translateY(-50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    left: 0;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes slideRightButtonIn {
+  0% {
+    opacity: 0;
+    right: 80px;
+    transform: translateY(-50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes slideLeftButton {
+  0% {
+    opacity: 1;
+    left: 0;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    opacity: 1;
+    left: 0;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes slideRightButton {
+  0% {
+    opacity: 1;
+    right: 0;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes mergeContainer {
+  0% {
+    width: 300px;
+  }
+  100% {
+    width: 200px;
+  }
+}
+
+/* Button Theme Styles */
+.click-button.theme-default {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.click-button.theme-simple {
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: white;
+  box-shadow: 0 4px 15px rgba(110, 142, 251, 0.4);
+}
+
+.click-button.theme-fire {
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  color: white;
+  box-shadow: 0 4px 15px rgba(229, 46, 113, 0.4);
+}
+
+.click-button.theme-ice {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+
 .click-button:hover {
   transform: scale(1.05);
 }
 
 .click-button:active {
   transform: scale(0.95);
+}
+
+.click-button.pressed {
+  transform: scale(0.95);
+}
+
+/* Theme Selector Styles */
+.theme-selector-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.theme-selector-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.theme-selector {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--text-secondary);
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.theme-selector:focus {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.theme-preview {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.theme-preview-item {
+  flex: 1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.theme-preview-default {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--text-secondary);
+}
+
+.theme-preview-simple {
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: white;
+}
+
+.theme-preview-fire {
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  color: white;
+}
+
+.theme-preview-ice {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
 }
 
 /* Leaderboard Modal Styles */
@@ -292,6 +516,20 @@ button {
 }
 
 /* Dev Settings Modal Styles */
+.dev-settings-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
 .dev-settings-modal {
   max-width: 600px;
 }
@@ -337,6 +575,74 @@ button {
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin-top: 0.25rem;
+}
+
+/* Toggle Switch */
+.toggle-control {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-right: 0.5rem;
+}
+
+.toggle-switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--primary-color);
+}
+
+input:focus + .toggle-slider {
+  box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.button-split-section {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
 }
 
 /* Leaderboard Table Styles */
@@ -620,6 +926,55 @@ button {
   }
   to {
     transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Unlock Notification */
+.unlock-notification-container {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.unlock-notification {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease-out forwards, fadeOut 0.3s ease-in forwards 2.7s;
+  max-width: 90%;
+  text-align: center;
+}
+
+.unlock-notification p {
+  margin: 0;
+  font-weight: 600;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
     opacity: 1;
   }
 }

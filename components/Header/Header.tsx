@@ -7,7 +7,7 @@ import MobileMenu from './MobileMenu';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
-  const { resetGame } = useGame();
+  const { resetGame, unlockedFeatures } = useGame();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -65,7 +65,7 @@ export default function Header() {
             </svg>
             <span className="reset-text">Reset Game</span>
           </button>
-          <LeaderboardButton />
+          {unlockedFeatures.leaderboard && <LeaderboardButton />}
           <button 
             className="theme-toggle" 
             onClick={toggleTheme}
