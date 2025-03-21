@@ -1,9 +1,12 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 // Define the leaderboard entry interface
 export interface LeaderboardEntry {
+  id?: number; // Supabase will provide this
   name: string;
   score: number;
+  created_at?: string; // Supabase timestamp
 }
 
 // Define button theme types
@@ -68,13 +71,14 @@ interface GameContextType {
   unlockedFeatures: UnlockedFeatures;
   selectFireIceTheme: (theme: 'fire' | 'ice') => void;
   hasSelectedFireIceTheme: boolean;
+  isLoading: boolean; // Add loading state
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [score, setScore] = useState<number>(0);
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(initialLeaderboardData);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
   const [isDevSettingsOpen, setIsDevSettingsOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -87,6 +91,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
     fireIceTheme: false
   });
   const [hasSelectedFireIceTheme, setHasSelectedFireIceTheme] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Add loading state
+
+  // Fetch leaderboard data from Supabase
+  const fetchLeaderboardData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/leaderboard');
+      if (!response.ok) {
+        throw new Error('Failed to fetch leaderboard data');
+      }
+      const data = await response.json();
+      setLeaderboardData(data);
+    } catch (error) {
+      console.error('Error fetching leaderboard data:', error);
+      // Fallback to localStorage if API fails
+      const savedLeaderboardData = localStorage.getItem('leaderboardData');
+      if (savedLeaderboardData) {
+        try {
+          setLeaderboardData(JSON.parse(savedLeaderboardData));
+        } catch (error) {
+          console.error('Failed to parse leaderboard data:', error);
+          setLeaderboardData(initialLeaderboardData);
+        }
+      } else {
+        setLeaderboardData(initialLeaderboardData);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Initialize from localStorage if available (client-side only)
   useEffect(() => {
@@ -96,20 +130,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setScore(parseInt(savedScore, 10));
     }
     
-    // Load leaderboard data from localStorage
-    const savedLeaderboardData = localStorage.getItem('leaderboardData');
-    if (savedLeaderboardData) {
-      try {
-        setLeaderboardData(JSON.parse(savedLeaderboardData));
-      } catch (error) {
-        console.error('Failed to parse leaderboard data:', error);
-        // If there's an error, use the initial data
-        setLeaderboardData(initialLeaderboardData);
-      }
-    } else {
-      // If no saved data, use the initial data with dummy entries
-      localStorage.setItem('leaderboardData', JSON.stringify(initialLeaderboardData));
-    }
+    // Fetch leaderboard data from Supabase
+    fetchLeaderboardData();
 
     // Load current user from localStorage
     const savedCurrentUser = localStorage.getItem('currentUser');
@@ -265,9 +287,33 @@ export function GameProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('hasSelectedFireIceTheme');
   };
 
-  const resetLeaderboard = () => {
-    setLeaderboardData(initialLeaderboardData);
-    localStorage.setItem('leaderboardData', JSON.stringify(initialLeaderboardData));
+  const resetLeaderboard = async () => {
+    try {
+      setIsLoading(true);
+      // Reset leaderboard via API
+      const response = await fetch('/api/leaderboard/reset', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset leaderboard');
+      }
+
+      // Refresh leaderboard data
+      await fetchLeaderboardData();
+      
+      toast.success('Leaderboard reset successfully!');
+    } catch (error) {
+      console.error('Error resetting leaderboard:', error);
+      
+      // Fallback to local reset if API fails
+      setLeaderboardData(initialLeaderboardData);
+      localStorage.setItem('leaderboardData', JSON.stringify(initialLeaderboardData));
+      
+      toast.error('Failed to connect to server. Leaderboard reset locally.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleLeaderboard = () => {
@@ -286,24 +332,48 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateCurrentUserScore = () => {
+  const updateCurrentUserScore = async () => {
     if (!currentUser) return;
 
-    setLeaderboardData(prev => {
-      // Find if the user already exists in the leaderboard
-      const userIndex = prev.findIndex(entry => entry.name === currentUser);
-      
-      if (userIndex !== -1) {
-        // Update existing user's score
-        const updatedData = [...prev];
-        updatedData[userIndex] = { ...updatedData[userIndex], score };
-        
-        // Sort by score (descending)
-        return updatedData.sort((a, b) => b.score - a.score);
+    try {
+      setIsLoading(true);
+      // Update score in Supabase
+      const response = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: currentUser, score }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update score');
       }
+
+      // Refresh leaderboard data
+      await fetchLeaderboardData();
+    } catch (error) {
+      console.error('Error updating score:', error);
       
-      return prev;
-    });
+      // Fallback to local update if API fails
+      setLeaderboardData(prev => {
+        // Find if the user already exists in the leaderboard
+        const userIndex = prev.findIndex(entry => entry.name === currentUser);
+        
+        if (userIndex !== -1) {
+          // Update existing user's score
+          const updatedData = [...prev];
+          updatedData[userIndex] = { ...updatedData[userIndex], score };
+          
+          // Sort by score (descending)
+          return updatedData.sort((a, b) => b.score - a.score);
+        }
+        
+        return prev;
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Function to get the current user's rank in the leaderboard
@@ -317,33 +387,60 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return userIndex + 1;
   };
 
-  const createAccount = (name: string) => {
+  const createAccount = async (name: string) => {
     if (!name.trim()) return;
     
-    // Set as current user
-    setCurrentUser(name.trim());
-    
-    // Add the new account to the leaderboard
-    const newEntry: LeaderboardEntry = {
-      name: name.trim(),
-      score: score
-    };
-    
-    // Add entry and sort the leaderboard by score (descending)
-    setLeaderboardData(prev => {
-      // Check if user already exists
-      const existingUserIndex = prev.findIndex(entry => entry.name === name.trim());
+    try {
+      setIsLoading(true);
+      // Set as current user
+      setCurrentUser(name.trim());
       
-      if (existingUserIndex !== -1) {
-        // Update existing user
-        const updatedData = [...prev];
-        updatedData[existingUserIndex] = newEntry;
-        return updatedData.sort((a, b) => b.score - a.score);
-      } else {
-        // Add new user
-        return [...prev, newEntry].sort((a, b) => b.score - a.score);
+      // Add the new account to the leaderboard via API
+      const response = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: name.trim(), score }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create account');
       }
-    });
+
+      // Refresh leaderboard data
+      await fetchLeaderboardData();
+      
+      toast.success('Account created successfully!');
+    } catch (error) {
+      console.error('Error creating account:', error);
+      
+      // Fallback to local update if API fails
+      const newEntry: LeaderboardEntry = {
+        name: name.trim(),
+        score: score
+      };
+      
+      // Add entry and sort the leaderboard by score (descending)
+      setLeaderboardData(prev => {
+        // Check if user already exists
+        const existingUserIndex = prev.findIndex(entry => entry.name === name.trim());
+        
+        if (existingUserIndex !== -1) {
+          // Update existing user
+          const updatedData = [...prev];
+          updatedData[existingUserIndex] = newEntry;
+          return updatedData.sort((a, b) => b.score - a.score);
+        } else {
+          // Add new user
+          return [...prev, newEntry].sort((a, b) => b.score - a.score);
+        }
+      });
+      
+      toast.error('Failed to connect to server. Account saved locally.');
+    } finally {
+      setIsLoading(false);
+    }
     
     // Keep the leaderboard open to show the updated scores
   };
@@ -372,7 +469,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       toggleSplitButton,
       unlockedFeatures,
       selectFireIceTheme,
-      hasSelectedFireIceTheme
+      hasSelectedFireIceTheme,
+      isLoading
     }}>
       {children}
     </GameContext.Provider>

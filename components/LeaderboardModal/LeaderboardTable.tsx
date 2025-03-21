@@ -1,7 +1,7 @@
 import { useGame } from '@/context/GameContext';
 
 export default function LeaderboardTable() {
-  const { leaderboardData } = useGame();
+  const { leaderboardData, isLoading } = useGame();
 
   return (
     <div className="leaderboard-table-container">
@@ -14,17 +14,28 @@ export default function LeaderboardTable() {
           </tr>
         </thead>
         <tbody>
-          {leaderboardData.map((entry, index) => (
-            <tr key={`${entry.name}-${index}`} className={index % 2 === 0 ? 'row-even' : 'row-odd'}>
-              <td className="rank-column">{index + 1}</td>
-              <td className="name-column">{entry.name}</td>
-              <td className="score-column">{entry.score.toLocaleString()}</td>
-            </tr>
-          ))}
-          {leaderboardData.length === 0 && (
+          {isLoading ? (
             <tr>
-              <td colSpan={3} className="no-data">No leaderboard entries yet</td>
+              <td colSpan={3} className="loading-data">
+                <div className="loading-spinner"></div>
+                <p>Loading leaderboard data...</p>
+              </td>
             </tr>
+          ) : (
+            <>
+              {leaderboardData.map((entry, index) => (
+                <tr key={`${entry.name}-${index}`} className={index % 2 === 0 ? 'row-even' : 'row-odd'}>
+                  <td className="rank-column">{index + 1}</td>
+                  <td className="name-column">{entry.name}</td>
+                  <td className="score-column">{entry.score.toLocaleString()}</td>
+                </tr>
+              ))}
+              {leaderboardData.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="no-data">No leaderboard entries yet</td>
+                </tr>
+              )}
+            </>
           )}
         </tbody>
       </table>

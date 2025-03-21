@@ -2,20 +2,15 @@ import { useGame } from '@/context/GameContext';
 import LeaderboardTable from './LeaderboardTable';
 import AccountCreationForm from './AccountCreationForm';
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 export default function LeaderboardModal() {
-  const { isLeaderboardOpen, toggleLeaderboard, currentUser, score, getCurrentUserRank } = useGame();
+  const { isLeaderboardOpen, toggleLeaderboard, currentUser, score, getCurrentUserRank, isLoading } = useGame();
   const modalRef = useRef<HTMLDivElement>(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('Score submitted successfully!');
 
   // Function to show toast notification
   const showSuccessToast = (message: string = 'Score submitted successfully!') => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000); // Hide after 3 seconds
+    toast.success(message);
   };
 
   // Function to handle account creation
@@ -112,19 +107,12 @@ export default function LeaderboardModal() {
           <button 
             className="close-button" 
             onClick={toggleLeaderboard}
+            disabled={isLoading}
           >
-            Close
+            {isLoading ? 'Loading...' : 'Close'}
           </button>
         </div>
       </div>
-      
-      {/* Toast notification */}
-      {showToast && (
-        <div className="toast-notification success" role="alert" aria-live="polite">
-          <span className="toast-icon" aria-hidden="true">🏆</span>
-          <p>{toastMessage}</p>
-        </div>
-      )}
     </div>
   );
 }
