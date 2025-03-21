@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Remove the output and distDir settings for Vercel deployment
+  // Ensure no distDir is set to public
 };
 
 module.exports = nextConfig;
