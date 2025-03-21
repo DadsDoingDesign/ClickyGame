@@ -970,6 +970,51 @@ input:checked + .toggle-slider:before {
   margin-bottom: 2rem;
 }
 
+/* Terms of Service Styles */
+.terms-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: var(--text-primary);
+}
+
+.terms-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.terms-container h2 {
+  font-size: 1.5rem;
+  margin: 1.5rem 0 1rem;
+  color: var(--text-primary);
+}
+
+.terms-container p,
+.terms-container ul,
+.terms-container ol {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.terms-container ul,
+.terms-container ol {
+  padding-left: 2rem;
+}
+
+.terms-container a {
+  color: var(--primary-cta);
+  text-decoration: underline;
+}
+
+.terms-container a:hover {
+  text-decoration: none;
+}
+
+.terms-container section {
+  margin-bottom: 2rem;
+}
+
 /* Toast Notification Styles */
 .toast-notification {
   position: fixed;
