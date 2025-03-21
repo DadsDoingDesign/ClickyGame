@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGame } from '@/context/GameContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface MobileMenuProps {
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { resetGame, toggleLeaderboard, toggleDevSettings, unlockedFeatures } = useGame();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut, setIsAuthModalOpen, setAuthView } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside the menu
@@ -67,6 +69,23 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     onClose();
   };
 
+  const handleSignIn = () => {
+    setAuthView('login');
+    setIsAuthModalOpen(true);
+    onClose();
+  };
+
+  const handleSignUp = () => {
+    setAuthView('register');
+    setIsAuthModalOpen(true);
+    onClose();
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -86,6 +105,49 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </button>
         </div>
         <div className="mobile-menu-content">
+          {user ? (
+            <div className="mobile-user-info">
+              <div className="user-email">{user.email}</div>
+              <button 
+                className="mobile-menu-item" 
+                onClick={handleSignOut}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <div className="mobile-auth-buttons">
+              <button 
+                className="mobile-menu-item" 
+                onClick={handleSignIn}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                  <polyline points="10 17 15 12 10 7"></polyline>
+                  <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                <span>Sign In</span>
+              </button>
+              <button 
+                className="mobile-menu-item primary-button" 
+                onClick={handleSignUp}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                  <line x1="20" y1="8" x2="20" y2="14"></line>
+                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>Sign Up</span>
+              </button>
+            </div>
+          )}
+          <div className="mobile-menu-divider"></div>
           <button 
             className="mobile-menu-item danger-button" 
             onClick={handleDevSettingsClick}

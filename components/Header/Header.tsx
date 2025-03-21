@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import LeaderboardButton from '@/components/LeaderboardButton/LeaderboardButton';
 import DevSettingsButton from '../DevSettings/DevSettingsButton';
 import MobileMenu from './MobileMenu';
+import { AuthButton } from '../Auth';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -66,6 +67,7 @@ export default function Header() {
             <span className="reset-text">Reset Game</span>
           </button>
           {unlockedFeatures.leaderboard && <LeaderboardButton />}
+          <AuthButton />
           <button 
             className="theme-toggle" 
             onClick={toggleTheme}
